@@ -12,6 +12,8 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
       - run: sdkmanager "ndk;21.4.7075529" "platforms;android-33" "build-tools;33.0.2"
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
