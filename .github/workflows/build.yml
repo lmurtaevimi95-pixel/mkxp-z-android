@@ -36,6 +36,7 @@ jobs:
           ln -sf $BIN/aarch64-linux-android21-clang++ $BIN/aarch64-linux-android-g++
           export PATH=$BIN:$PATH
           sed -i 's#https://github.com/freedesktop/uchardet#https://gitlab.freedesktop.org/uchardet/uchardet#; s#https://github.com/freedesktop/pixman#https://gitlab.freedesktop.org/pixman/pixman#' get_deps.sh
+          sudo mkdir -p /var/lib/gems/3.1.0 && sudo chown -R $(id -u):$(id -g) /var/lib/gems
           bash get_deps.sh
           make 2>&1 | tee /tmp/make.log || { echo "=== LAST LINES ==="; tail -n 40 /tmp/make.log; exit 1; }
       - run: chmod +x gradlew
