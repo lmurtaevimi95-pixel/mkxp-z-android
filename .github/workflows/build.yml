@@ -19,17 +19,25 @@ jobs:
         working-directory: app/jni
         env:
           ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/23.1.7779620
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/23.1.7779620
           NDK: /usr/local/lib/android/sdk/ndk/23.1.7779620
         run: |
+          set -o pipefail
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config bison ruby cmake ninja-build
           P=$NDK/toolchains/llvm/prebuilt
           for d in bin sysroot lib; do
             if [ -e $P/linux-x86_64/$d ] && [ ! -e $P/$d ]; then ln -s linux-x86_64/$d $P/$d; fi
           done
+          BIN=$P/linux-x86_64/bin
+          ln -sf $BIN/armv7a-linux-androideabi21-clang $BIN/arm-linux-androideabi-gcc
+          ln -sf $BIN/armv7a-linux-androideabi21-clang++ $BIN/arm-linux-androideabi-g++
+          ln -sf $BIN/aarch64-linux-android21-clang $BIN/aarch64-linux-android-gcc
+          ln -sf $BIN/aarch64-linux-android21-clang++ $BIN/aarch64-linux-android-g++
+          export PATH=$BIN:$PATH
           sed -i 's#https://github.com/freedesktop/uchardet#https://gitlab.freedesktop.org/uchardet/uchardet#; s#https://github.com/freedesktop/pixman#https://gitlab.freedesktop.org/pixman/pixman#' get_deps.sh
           bash get_deps.sh
-          make || { echo "=== ERRORS ==="; grep -n -i -B2 -A8 "cannot\|error\|no such" libiconv/config.log | head -70; exit 1; }
+          make 2>&1 | tee /tmp/make.log || { echo "=== LAST LINES ==="; tail -n 40 /tmp/make.log; exit 1; }
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
