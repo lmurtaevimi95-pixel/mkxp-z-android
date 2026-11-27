@@ -23,9 +23,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config bison ruby cmake ninja-build
+          P=$NDK/toolchains/llvm/prebuilt
+          for d in bin sysroot lib; do
+            if [ -e $P/linux-x86_64/$d ] && [ ! -e $P/$d ]; then ln -s linux-x86_64/$d $P/$d; fi
+          done
           sed -i 's#https://github.com/freedesktop/uchardet#https://gitlab.freedesktop.org/uchardet/uchardet#; s#https://github.com/freedesktop/pixman#https://gitlab.freedesktop.org/pixman/pixman#' get_deps.sh
           bash get_deps.sh
-          make || { echo "=== CONFIG LOG ==="; tail -n 60 libiconv/config.log; exit 1; }
+          make || { echo "=== ERRORS ==="; grep -n -i -B2 -A8 "cannot\|error\|no such" libiconv/config.log | head -70; exit 1; }
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
