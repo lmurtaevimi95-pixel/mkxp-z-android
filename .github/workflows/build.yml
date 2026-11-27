@@ -14,7 +14,17 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: ''
-      - run: sdkmanager "ndk;21.4.7075529" "platforms;android-33" "build-tools;33.0.2"
+      - run: sdkmanager "ndk;23.1.7779620" "platforms;android-33" "build-tools;33.0.2"
+      - name: Build native dependencies
+        working-directory: app/jni
+        env:
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/23.1.7779620
+          NDK: /usr/local/lib/android/sdk/ndk/23.1.7779620
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config bison ruby cmake ninja-build
+          bash get_deps.sh
+          make
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
