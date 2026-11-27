@@ -39,6 +39,7 @@ jobs:
           sudo mkdir -p /var/lib/gems/3.1.0 && sudo chown -R $(id -u):$(id -g) /var/lib/gems
           bash get_deps.sh
           make 2>&1 | tee /tmp/make.log || { echo "=== LAST LINES ==="; tail -n 40 /tmp/make.log; exit 1; }
+      - run: sed -i "s/include 'armeabi-v7a', 'arm64-v8a'/include 'armeabi-v7a'/" app/build.gradle
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
