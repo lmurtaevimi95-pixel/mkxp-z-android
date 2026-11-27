@@ -23,8 +23,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config bison ruby cmake ninja-build
+          sed -i 's#https://github.com/freedesktop/uchardet#https://gitlab.freedesktop.org/uchardet/uchardet#; s#https://github.com/freedesktop/pixman#https://gitlab.freedesktop.org/pixman/pixman#' get_deps.sh
           bash get_deps.sh
-          make
+          make || { echo "=== CONFIG LOG ==="; tail -n 60 libiconv/config.log; exit 1; }
       - run: chmod +x gradlew
       - run: ./gradlew assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
